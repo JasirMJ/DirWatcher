@@ -1,0 +1,6 @@
+venv/
+/venv/
+/env/
+/media/
+/.idea
+/db.sqlite3
