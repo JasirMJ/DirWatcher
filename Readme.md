@@ -41,3 +41,89 @@ DirWatcher which runs a long running background time looped scheduled task with 
 #####9.Run Celery Beat 
 * celery -A dirwatcher beat -l info 
 
+#### API
+
+http://localhost:8000/dir/
+
+#### GET API : 
+* http://localhost:8000/dir/path=E:\TestDir -- To get all available files in the specified path, this will create new record if the path not in the record
+##### Response     
+```
+{
+        "Status": true,
+        "Message": "",
+        "Data": {
+            "id": 43,
+            "name": "E:\\TestDir",
+            "path": "E:\\TestDir",
+            "created_at": "2022-05-27T13:59:41.870740Z",
+            "updated_at": "2022-05-28T18:08:32.956147Z",
+            "is_deleted": false,
+            "files": [
+                {
+                    "id": 159,
+                    "name": "alramool_52.66.91.176-20220506-122204-fhuwyj.wpress",
+                    "created_at": "2022-05-27T13:59:41.886737Z",
+                    "updated_at": "2022-05-27T13:59:41.886737Z",
+                    "deleted_at": null,
+                    "is_deleted": false,
+                    "record": 43
+                },
+                {
+                    "id": 160,
+                    "name": "fluido_13.233.183.118-20220506-121918-ozcpfq.wpress",
+                    "created_at": "2022-05-27T13:59:41.891739Z",
+                    "updated_at": "2022-05-27T13:59:41.891739Z",
+                    "deleted_at": null,
+                    "is_deleted": false,
+                    "record": 43
+                }
+            ],
+            "monitor_enabled": true
+        }
+    }
+```
+#### POST API :
+*  http://localhost:8000/dir/ //with the below payload to enable or disable monitoring
+##### Payload
+    'id': '43', // pass id for update record
+    'name': 'E:\TestDir',
+    'path': 'E:\TestDir',
+    'monitor_enabled': '1' // to enable monitoring set to 1 else to 0
+
+##### Response 
+```
+{
+    "Status": true,
+    "Message": "Data updated",
+    "Data": {
+        "id": 43,
+        "name": "E:\\TestDir",
+        "path": "E:\\TestDir",
+        "created_at": "2022-05-27T13:59:41.870740Z",
+        "updated_at": "2022-05-28T20:06:26.272933Z",
+        "is_deleted": false,
+        "files": [
+            {
+                "id": 159,
+                "name": "alramool_52.66.91.176-20220506-122204-fhuwyj.wpress",
+                "created_at": "2022-05-27T13:59:41.886737Z",
+                "updated_at": "2022-05-27T13:59:41.886737Z",
+                "deleted_at": null,
+                "is_deleted": false,
+                "record": 43
+            },
+            {
+                "id": 160,
+                "name": "fluido_13.233.183.118-20220506-121918-ozcpfq.wpress",
+                "created_at": "2022-05-27T13:59:41.891739Z",
+                "updated_at": "2022-05-27T13:59:41.891739Z",
+                "deleted_at": null,
+                "is_deleted": false,
+                "record": 43
+            }
+        ],
+        "monitor_enabled": true
+    }
+}
+```
