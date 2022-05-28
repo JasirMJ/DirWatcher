@@ -34,7 +34,7 @@ def setup_periodic_tasks(sender, **kwargs):
         #    minute='*',# Executes every hour
         #    # minute='*',
         # ),
-        60.0,
+        10.0,
         test.s('DIR CHECKER'),
     )
 

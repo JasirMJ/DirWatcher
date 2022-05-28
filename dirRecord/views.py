@@ -23,7 +23,7 @@ class DirectoryRecordSerializer(DynamicFieldsModelSerializer):
 
     class Meta : 
         model = DirectoryRecords
-        fields = [ "id", "name", "path", "created_at", "updated_at", "is_deleted", "files",]
+        fields = [ "id", "name", "path", "created_at", "updated_at", "is_deleted", "files","monitor_enabled"]
         exclude_list = []
 
     def get_files(self,obj):
@@ -49,7 +49,10 @@ class DirRecordAPI(ListAPIView):
         except Exception as e:
             return ResponseFunction(0, str(e), {})
         obj = dirMonitorChecker(path,listDir)
-        return ResponseFunction(1, "", DirectoryRecordSerializer(obj).data)
+        if obj:
+            return ResponseFunction(1, "", DirectoryRecordSerializer(obj).data)
+        else:
+            return ResponseFunction(1, "No Record to show",{})
 
     # def get_queryset(self):
     #     return DirectoryRecords.objects.all()
@@ -67,9 +70,8 @@ class DirRecordAPI(ListAPIView):
             id = self.request.POST.get("id", "")
             obj = create_or_update_dir_record(request.data,id)
 
-            return ResponseFunction(1, obj.msg, DirectoryRecordSerializer(obj.obj).data)
+            return ResponseFunction(1, obj['message'], DirectoryRecordSerializer(obj['obj']).data)
         except Exception as e:
-            printLineNo()
             print("Excepction ", printLineNo(), " : ", e)
             return ResponseFunction(0,f"Excepction occured {str(e)}",{})
 
@@ -85,14 +87,8 @@ class DirRecordAPI(ListAPIView):
                 return ResponseFunction(1, "Deleted data having id " + str(id),{})
 
         except Exception as e:
-            printLineNo()
-            return Response(
-                {
-                    STATUS: False,
-                    MESSAGE: str(e),
-                    "line_no": printLineNo()
-                }
-            )
+            msg = f"Excepction occured {str(e)} at Line Number : {printLineNo()}"
+            return ResponseFunction(0,msg,{})
 
 class DirFilesAPI(ListAPIView):
     serializer_class = DirFilesSerializer
@@ -112,7 +108,7 @@ class DirFilesAPI(ListAPIView):
         try:
             id = self.request.POST.get("id", "")
             obj = create_or_update_dir_files(request.data,id)
-            return ResponseFunction(1, obj['msg'], DirFilesSerializer(obj['obj']).data)
+            return ResponseFunction(1, obj['message'], DirFilesSerializer(obj['obj']).data)
         except Exception as e:
             print("Excepction : ", printLineNo(), " : ", e)
             return ResponseFunction(0,f"Excepction occured {str(e)}",{})
@@ -121,7 +117,6 @@ def create_or_update_dir_record(data,id):
     '''General function for create or update record'''
     msg = ""
     if id:
-        print("Country Updating")
         qs = DirectoryRecords.objects.filter(id=id)
         if not qs.count():
             return ResponseFunction(0, "Country Not Found", {})
@@ -129,7 +124,6 @@ def create_or_update_dir_record(data,id):
         serializer = DirectoryRecordSerializer(obj, data=data, partial=True)
         msg = "Data updated"
     else:
-        print("Adding new Country")
         serializer = DirectoryRecordSerializer(data=data, partial=True)
         msg = "Data saved"
     serializer.is_valid(raise_exception=True)
@@ -141,7 +135,6 @@ def create_or_update_dir_files(data,id):
     '''General function for create or update files'''
     msg = ""
     if id:
-        print("Country Updating")
         qs = DirFiles.objects.filter(id=id)
         if not qs.count():
             return ResponseFunction(0, "Country Not Found", {})
@@ -149,7 +142,6 @@ def create_or_update_dir_files(data,id):
         serializer = DirFilesSerializer(obj, data=data, partial=True)
         msg = "Data updated"
     else:
-        print("Adding new Country")
         serializer = DirFilesSerializer(data=data, partial=True)
         msg = "Data saved"
     serializer.is_valid(raise_exception=True)
@@ -164,7 +156,7 @@ def dirMonitorChecker(path,listDir):
     '''
 
     if path=="all":
-        for record in DirectoryRecords.objects.all():
+        for record in DirectoryRecords.objects.filter(monitor_enabled=True):
             listDir = os.listdir(record.path)
             print("lst Dir ",listDir)
             dirMonitor(record.path,listDir)
@@ -182,7 +174,12 @@ def dirMonitor(path,listDir):
         obj = create_or_update_dir_record(data,"")
         obj = obj['obj']
     else:
-        obj = qs[0]
+        qs = qs.filter(monitor_enabled=True)
+        if qs.exists():
+            obj = qs.first()
+        else:
+            obj = 0
+            return obj
 
     files_obj = DirFiles.objects.filter(record=obj)
 
