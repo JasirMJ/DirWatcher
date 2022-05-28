@@ -19,8 +19,7 @@ DirWatcher which runs a long running background time looped scheduled task with 
 ##### 1.Make sure python 3 is installed
 
 ##### 2.Clone project
-* Hope every one do this
-
+* Hope everybody knows it
 ##### 3.Create and activate virtual environment
 
 ##### 4.Install requirements
